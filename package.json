@@ -1,0 +1,10 @@
+{
+  "name": "dr-bilerak",
+  "version": "1.0.0",
+  "description": "Gestión de actas y reuniones (web app estática)",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve -l 3000 ."
+  },
+  "license": "ISC"
+}

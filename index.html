@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title i18n="appName">Gesti\u00f3n de Actas</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css">
+    <script src="https://unpkg.com/dexie@3.2.6/dist/dexie.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- ========== LOGIN SCREEN ========== -->
+        <div id="login-screen">
+            <div class="login-box">
+                <div class="login-logo">&#x1F4C4;</div>
+                <h1 class="login-title" i18n="appName">Gesti&oacute;n de Actas</h1>
+                <p class="login-sub" i18n="login.title">Accede a tu panel de administraci&oacute;n</p>
+                <div class="login-form">
+                    <div class="login-field">
+                        <label for="login-username" i18n="login.user">Usuario</label>
+                        <input type="text" id="login-username" placeholder="Nombre de usuario" autocomplete="off" />
+                    </div>
+                    <div class="login-field">
+                        <label for="login-password" i18n="login.password">Contrase&ntilde;a</label>
+                        <input type="password" id="login-password" placeholder="Contrase&ntilde;a" />
+                    </div>
+                    <button class="btn primary login-btn" onclick="App.login()" i18n="login.button">Iniciar Sesi&oacute;n</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== MAIN APP ========== -->
+        <div id="app-content" class="hidden">
+            <header id="app-header">
+                <span id="app-title">Gesti&oacute;n de Actas</span>
+                <div id="header-actions">
+                    <span id="user-name" style="font-size:13px;opacity:0.9;"></span>
+                </div>
+            </header>
+
+            <main id="main-content">
+                <!-- Home -->
+                <section id="page-home" class="page active"></section>
+
+                <!-- Groups -->
+                <section id="page-groups" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn primary" onclick="App.showGroupForm()">+ Nueva Agrupaci&oacute;n</button>
+                        <button class="btn secondary" onclick="App.navTo('contacts')">Contactos</button>
+                    </div>
+                    <div id="groups-list" class="data-list"></div>
+                </section>
+
+                <!-- Contacts -->
+                <section id="page-contacts" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn primary" onclick="App.showContactForm()">+ Nuevo Contacto</button>
+                        <button class="btn secondary" onclick="App.showImportForm()">Importar CSV/Excel</button>
+                        <select id="filter-group" onchange="App.renderContacts()">
+                            <option value="">Todas las agrupaciones</option>
+                        </select>
+                    </div>
+                    <div id="contacts-list" class="data-list"></div>
+                </section>
+
+                <!-- Meetings -->
+                <section id="page-meetings" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn primary" onclick="App.showMeetingForm()">+ Nueva Acta</button>
+                    </div>
+                    <div id="meetings-list" class="data-list"></div>
+                </section>
+
+                <!-- Meeting Detail -->
+                <section id="page-meeting-detail" class="page">
+                    <div class="page-toolbar">
+                        <button class="btn secondary" onclick="App.navTo('meetings')">&larr; Volver</button>
+                        <button class="btn primary" onclick="App.showMeetingForm(App.currentMeetingId)">Editar</button>
+                        <button class="btn danger" onclick="App.deleteMeeting()">Eliminar</button>
+                    </div>
+                    <div id="meeting-detail"></div>
+                </section>
+
+                <!-- Topics -->
+                <section id="page-topics" class="page">
+                    <div class="page-toolbar">
+                        <select id="filter-meeting-topics" onchange="App.renderTopics()">
+                            <option value="">Todas las actas</option>
+                        </select>
+                        <select id="filter-resolved" onchange="App.renderTopics()">
+                            <option value="">Todos los temas</option>
+                            <option value="0">Pendientes</option>
+                            <option value="1">Resueltos</option>
+                        </select>
+                    </div>
+                    <div id="topics-list" class="data-list"></div>
+                </section>
+
+                <!-- Settings -->
+                <section id="page-settings" class="page"></section>
+            </main>
+
+            <!-- ========== BOTTOM NAVIGATION ========== -->
+            <nav id="bottom-nav">
+                <div class="nav-item active" data-page="home">
+                    <span class="nav-item-icon">&#x1F3E0;</span>
+                    <span class="nav-item-label" i18n="nav.home">Inicio</span>
+                </div>
+                <div class="nav-item" data-page="groups">
+                    <span class="nav-item-icon">&#x1F465;</span>
+                    <span class="nav-item-label" i18n="nav.groups">Grupos</span>
+                </div>
+                <div class="nav-item" data-page="meetings">
+                    <span class="nav-item-icon">&#x1F4C4;</span>
+                    <span class="nav-item-label" i18n="nav.meetings">Actas</span>
+                </div>
+                <div class="nav-item" data-page="topics">
+                    <span class="nav-item-icon">&#x1F4CB;</span>
+                    <span class="nav-item-label" i18n="nav.topics">Temas</span>
+                </div>
+                <div class="nav-item" data-page="settings">
+                    <span class="nav-item-icon">&#x2699;</span>
+                    <span class="nav-item-label" i18n="nav.settings">Ajustes</span>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Snackbar -->
+    <div id="snackbar"></div>
+
+    <!-- Modal -->
+    <div id="modal-overlay" class="hidden"></div>
+    <div id="modal" class="hidden">
+        <div id="modal-header">
+            <h2 id="modal-title">T&iacute;tulo</h2>
+            <button class="icon-btn" onclick="App.closeModal()">&times;</button>
+        </div>
+        <div id="modal-body"></div>
+        <div id="modal-footer"></div>
+    </div>
+
+    <!-- Scripts (load order matters) -->
+    <script src="js/config.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/lang.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/groups.js"></script>
+    <script src="js/contacts.js"></script>
+    <script src="js/meetings.js"></script>
+    <script src="js/topics.js"></script>
+    <script src="js/pdf.js"></script>
+    <script src="js/import.js"></script>
+</body>
+</html>
